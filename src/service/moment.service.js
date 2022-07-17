@@ -1,4 +1,7 @@
 const connection = require('../app/database');
+const {
+  APP_HOST, APP_PORT
+} = require('../app/config');
 
 const sqlFrame = `
 SELECT
@@ -34,7 +37,7 @@ class MomentService{
         ) 
         FROM moment_label ml LEFT JOIN label l ON ml.label_id = l.id WHERE ml.moment_id = m.id
       ) labels,
-      (SELECT JSON_ARRAYAGG(CONCAT('http://localhost:8000/moment/images/', f.filename)) FROM file f WHERE m.id = f.moment_id ) images
+      (SELECT JSON_ARRAYAGG(CONCAT('${APP_HOST}:${APP_PORT}/moment/images/', f.filename)) FROM file f WHERE m.id = f.moment_id ) images
     FROM moment m 
     LEFT JOIN user u ON m.user_id = u.id
     LEFT JOIN comment c ON c.moment_id = m.id
@@ -53,7 +56,7 @@ class MomentService{
       JSON_OBJECT('userId', u.id, 'userName', u.name) author,
       (SELECT COUNT(*) FROM comment c WHERE c.moment_id = m.id) commentCount,
       (SELECT COUNT(*) FROM moment_label ml WHERE ml.moment_id = m.id) labelCount,
-      (SELECT JSON_ARRAYAGG(CONCAT('http://localhost:8000/moment/images/', f.filename)) FROM file f WHERE m.id = f.moment_id ) images
+      (SELECT JSON_ARRAYAGG(CONCAT('${APP_HOST}:${APP_PORT}/moment/images/', f.filename)) FROM file f WHERE m.id = f.moment_id ) images
     FROM moment m 
     LEFT JOIN user u ON m.user_id = u.id
     GROUP BY m.id
